@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
+	"aiimageproject/internal/handler"
 	"aiimageproject/internal/middleware"
-	"aiimageproject/internal/model"
 	"aiimageproject/pkg/jwt"
 	"aiimageproject/pkg/response"
 
@@ -20,7 +20,9 @@ func main() {
 	initConfig()
 
 	db := initDB()
-	autoMigrate(db)
+	if db != nil {
+		autoMigrate(db)
+	}
 
 	jwtService := jwt.NewJWT(
 		viper.GetString("jwt.secret"),
@@ -31,6 +33,7 @@ func main() {
 
 	addr := fmt.Sprintf(":%d", viper.GetInt("server.port"))
 	log.Printf("Server starting on %s", addr)
+	log.Printf("Image Engine: %s", viper.GetString("image_engine.base_url"))
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -42,12 +45,16 @@ func initConfig() {
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath(".")
 
+	viper.SetDefault("server.port", 8081)
+	viper.SetDefault("server.mode", "debug")
+	viper.SetDefault("image_engine.base_url", "http://localhost:8080")
+	viper.SetDefault("image_engine.timeout", 120)
+
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Failed to read config: %v", err)
+		log.Printf("Warning: Failed to read config file: %v, using defaults", err)
 	}
 
-	viper.SetDefault("server.port", 8080)
-	viper.SetDefault("server.mode", "debug")
+	log.Printf("Config loaded - Image Engine URL: %s", viper.GetString("image_engine.base_url"))
 }
 
 func initDB() *gorm.DB {
@@ -62,30 +69,27 @@ func initDB() *gorm.DB {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Failed to connect database: %v", err)
+		log.Printf("Warning: Failed to connect database: %v", err)
+		log.Printf("Running without database connection...")
+		return nil
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("Failed to get sql.DB: %v", err)
+		log.Printf("Warning: Failed to get sql.DB: %v", err)
+		return nil
 	}
 
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
+	log.Printf("Database connected successfully")
 	return db
 }
 
 func autoMigrate(db *gorm.DB) {
-	err := db.AutoMigrate(
-		&model.User{},
-		&model.Image{},
-		&model.Category{},
-	)
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	}
+	// TODO: Add models when needed
 }
 
 func setupRouter(db *gorm.DB, jwtService *jwt.JWT) *gin.Engine {
@@ -96,12 +100,7 @@ func setupRouter(db *gorm.DB, jwtService *jwt.JWT) *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(middleware.CORS())
 
-	r.GET("/health", func(c *gin.Context) {
-		response.Success(c, gin.H{
-			"status": "ok",
-			"time":   time.Now().Format(time.RFC3339),
-		})
-	})
+	r.GET("/health", handler.HealthCheck)
 
 	r.GET("/", func(c *gin.Context) {
 		response.Success(c, gin.H{
@@ -115,6 +114,13 @@ func setupRouter(db *gorm.DB, jwtService *jwt.JWT) *gin.Engine {
 		api.GET("/ping", func(c *gin.Context) {
 			response.Success(c, gin.H{"message": "pong"})
 		})
+
+		api.GET("/models", handler.GetModels)
+		api.GET("/models/capabilities", handler.GetCapabilities)
+		api.GET("/models/capability/:capability", handler.GetModelsByCapability)
+
+		api.POST("/text2image", handler.Text2Image)
+		api.POST("/image/edit", handler.ImageEdit)
 	}
 
 	return r

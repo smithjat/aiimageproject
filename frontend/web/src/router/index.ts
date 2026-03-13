@@ -4,8 +4,27 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/Home.vue'),
+    redirect: '/text-to-image',
+  },
+  {
+    path: '/text-to-image',
+    name: 'TextToImage',
+    component: () => import('@/views/TextToImage.vue'),
+  },
+  {
+    path: '/image-edit',
+    name: 'ImageEdit',
+    component: () => import('@/views/ImageEdit.vue'),
+  },
+  {
+    path: '/cross-border',
+    name: 'CrossBorder',
+    component: () => import('@/views/CrossBorder.vue'),
+  },
+  {
+    path: '/food-business',
+    name: 'FoodBusiness',
+    component: () => import('@/views/FoodBusiness.vue'),
   },
   {
     path: '/login',
@@ -18,16 +37,6 @@ const routes: RouteRecordRaw[] = [
     name: 'Register',
     component: () => import('@/views/Register.vue'),
     meta: { guest: true },
-  },
-  {
-    path: '/images',
-    name: 'Images',
-    component: () => import('@/views/Images.vue'),
-  },
-  {
-    path: '/images/:id',
-    name: 'ImageDetail',
-    component: () => import('@/views/ImageDetail.vue'),
   },
   {
     path: '/profile',
@@ -48,7 +57,7 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !token) {
     next({ name: 'Login', query: { redirect: to.fullPath } })
   } else if (to.meta.guest && token) {
-    next({ name: 'Home' })
+    next({ name: 'TextToImage' })
   } else {
     next()
   }

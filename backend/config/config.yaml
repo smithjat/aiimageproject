@@ -1,6 +1,12 @@
 server:
-  port: 8080
+  port: 8081
   mode: debug
+
+image_engine:
+  base_url: http://localhost:8080
+  timeout: 120
+  api_key: sk-cyberstroll-yyy-yyyy
+  auth_enabled: true
 
 database:
   type: mysql
