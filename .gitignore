@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+uploads/
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Frontend
+frontend/web/node_modules/
+frontend/web/dist/
+
+# Backend
+backend/bin/
+
+# Miniprogram
+frontend/miniprogram/node_modules/
+
+# Mobile
+frontend/mobile/node_modules/
+
+# Test coverage
+coverage/
+*.coverprofile
+
+# Docker volumes (if mounted locally)
+mysql-data/
+redis-data/

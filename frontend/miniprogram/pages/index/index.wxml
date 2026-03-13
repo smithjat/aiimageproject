@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="header">
+    <text class="title">AI Image Project</text>
+    <text class="subtitle">智能图像管理平台</text>
+  </view>
+  
+  <view class="features">
+    <view class="feature-item">
+      <text class="feature-icon">🖼️</text>
+      <text class="feature-title">图像管理</text>
+      <text class="feature-desc">上传、管理您的图像</text>
+    </view>
+    <view class="feature-item">
+      <text class="feature-icon">🔍</text>
+      <text class="feature-title">智能搜索</text>
+      <text class="feature-desc">快速找到需要的图像</text>
+    </view>
+    <view class="feature-item">
+      <text class="feature-icon">📱</text>
+      <text class="feature-title">多端同步</text>
+      <text class="feature-desc">Web、小程序、移动端</text>
+    </view>
+  </view>
+
+  <view class="actions" wx:if="{{!hasLogin}}">
+    <button class="btn-primary" bindtap="goLogin">立即登录</button>
+  </view>
+</view>
